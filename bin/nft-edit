@@ -23,18 +23,20 @@
 # SOFTWARE.
 #
 
-if [ -f /etc/sysconfig/nftables.conf ]; then
-    # Fedora
-    CONFIG_FILE="/etc/sysconfig/nftables.conf"
-elif [ -f /etc/nftables.conf ]; then
-    # Debian
-    CONFIG_FILE="/etc/nftables.conf"
+# Load config from /etc or commandline
+CONFIG_FILE="/etc/captain-contraption.conf"
+if [ "$1" ]; then
+    CONFIG_FILE="$1"
+fi
+if [ -f "$CONFIG_FILE" ]; then
+    # shellcheck disable=SC1090
+    . "$CONFIG_FILE"
 else
-    echo "ERROR: nftables.conf not found." 1>&2
+    echo "$CONFIG_FILE does not exist. Exiting."  1>&2
     exit 1
 fi
 
-nano "$CONFIG_FILE" && \
-    nft --check --file "$CONFIG_FILE" && \
+nano "$NFT_CONFIG" && \
+    nft --check --file "$NFT_CONFIG" && \
     systemctl reload nftables.service && \
     nft list ruleset

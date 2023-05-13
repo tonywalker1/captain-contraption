@@ -37,4 +37,3 @@ else
 fi
 
 "$AIDE_BIN" --check --config "$AIDE_CONFIG"
-
