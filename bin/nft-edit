@@ -30,7 +30,7 @@ elif [ -f /etc/nftables.conf ]; then
     # Debian
     CONFIG_FILE="/etc/nftables.conf"
 else
-    echo "ERROR: nftables.conf not found."
+    echo "ERROR: nftables.conf not found." 1>&2
     exit 1
 fi
 
@@ -38,4 +38,3 @@ nano "$CONFIG_FILE" && \
     nft --check --file "$CONFIG_FILE" && \
     systemctl reload nftables.service && \
     nft list ruleset
-
