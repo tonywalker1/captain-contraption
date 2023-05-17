@@ -24,17 +24,19 @@
 #
 
 # Load config from /etc or commandline
-CONFIG_FILE="/etc/captain-contraption.conf"
 if [ "$1" ]; then
     CONFIG_FILE="$1"
-fi
-if [ -f "$CONFIG_FILE" ]; then
-    # shellcheck disable=SC1090
-    . "$CONFIG_FILE"
+elif [ -f "/etc/captain-contraption.conf" ]; then
+    CONFIG_FILE="/etc/captain-contraption.conf"
+elif [ -f "/usr/local/etc/captain-contraption.conf" ]; then
+    CONFIG_FILE="/usr/local/etc/captain-contraption.conf"
 else
-    echo "$CONFIG_FILE does not exist. Exiting."  1>&2
+    echo "captain-contraption.conf not found. Exiting."  1>&2
     exit 1
 fi
+# shellcheck disable=SC1090
+. "$CONFIG_FILE"
+
 
 nano "$NFT_CONFIG" && \
     nft --check --file "$NFT_CONFIG" && \
