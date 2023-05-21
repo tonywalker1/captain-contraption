@@ -37,4 +37,4 @@ fi
 # shellcheck disable=SC1090
 . "$CONFIG_FILE"
 
-"$AIDE_BIN" --check --config "$AIDE_CONFIG"
+aide --check --config "$AIDE_CONFIG"

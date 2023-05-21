@@ -42,7 +42,7 @@ if [ -f "$AIDE_DB" ]; then
     cp -f "$AIDE_DB" "$AIDE_OLD_DB"
 fi
 # Initialize the database
-"$AIDE_BIN" --update --config "$AIDE_CONFIG"
+aide --update --config "$AIDE_CONFIG"
 # Replace the current database with the new one
 cp -f "$AIDE_NEW_DB" "$AIDE_DB"
 # Ensure only the owner (probably root) has access
