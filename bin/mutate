@@ -23,13 +23,29 @@
 # SOFTWARE.
 #
 
+# load config
+SCRIPT_NAME=$(realpath "$0")
+BIN_DIR=$(dirname "$SCRIPT_NAME")
+ETC_DIR=$(realpath "$BIN_DIR/../etc")
+# shellcheck disable=SC1090
+. "$ETC_DIR/captain-contraption.conf"
+
+# validate input
 FILE="$1"
-if [ ! -f "$FILE" ]; then
+if [ ! "$FILE" ]; then
+    echo "ERROR: File not specified."  1>&2
+    echo "Usage: mutate <file>"  1>&2
+    exit 1
+elif [ ! -f "$FILE" ]; then
     echo "File \'$FILE\' not found."  1>&2
     echo "Usage: mutate <file>"  1>&2
     exit 1
 fi
 
-chattr -i "$FILE"
-nano -wl "$FILE"
-chattr +i "$FILE"
+# edit and leave immutability set
+if chattr -i "$FILE"; then
+    $TEXT_EDITOR "$FILE"
+    chattr +i "$FILE"
+else
+    $TEXT_EDITOR "$FILE"
+fi
