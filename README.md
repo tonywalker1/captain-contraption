@@ -15,7 +15,16 @@ this project.
 
 # Contents
 
-**nft-edit:**
-This is a simple wrapper for editing nftables rules: running the individual commands is tedious and error-prone. It
-loads the rules in my preferred text editor. When I exit the editor, this script checks the new ruleset for errors,
-loads the new rules, and finally prints them.
+### **nft-edit**
+
+nft-edit is a simple wrapper to reduce the tedium of editing, checking, and reloading firewall rules. It loads the rules
+in your preferred text editor. When you exit your editor, it checks the rules for errors. If no errors are found, it
+loads the new rules, and prints them for visual inspection.
+
+### **mutate**
+
+To prevent accidental overwrites or deletions, immutable files are useful. However, running chattr twice is tedious.
+This script takes the file to edit as a commandline argument and opens it in your preferred text editor. If the
+immutable attribute is set, the script will clear it before editing and set it after editing. If the file is not
+immutable, then the file is left immutable. In this way, this script can be an all-purpose synonym for your preferred
+text editor.
