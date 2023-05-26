@@ -23,22 +23,36 @@
 # SOFTWARE.
 #
 
-# Load config from /etc or commandline
-if [ "$1" ]; then
-    CONFIG_FILE="$1"
-elif [ -f "/etc/captain-contraption.conf" ]; then
-    CONFIG_FILE="/etc/captain-contraption.conf"
-elif [ -f "/usr/local/etc/captain-contraption.conf" ]; then
-    CONFIG_FILE="/usr/local/etc/captain-contraption.conf"
-else
-    echo "captain-contraption.conf not found. Exiting."  1>&2
+#
+# nft-edit
+#
+# This is a simple wrapper for editing nftables rules: running the individual
+# commands is tedious and error prone. It loads the rules in my preferred text
+# editor. When I exit the editor, this script checks the new ruleset for
+# errors, loads the new rules, and finally prints them.
+#
+
+# load config
+SCRIPT_NAME=$(realpath "$0")
+BIN_DIR=$(dirname "$SCRIPT_NAME")
+ETC_DIR=$(realpath "$BIN_DIR/../etc")
+# shellcheck disable=SC1090
+. "$ETC_DIR/captain-contraption.conf"
+
+# validate input
+if [ ! "$TEXT_EDITOR" ]; then
+    echo "ERROR: Set TEXT_EDITOR in $ETC_DIR/captain-contraption.conf"  1>&2
+    exit 1
+elif [ ! "$NFT_CONFIG" ]; then
+    echo "ERROR: Set NFT_CONFIG in $ETC_DIR/captain-contraption.conf"  1>&2
+    exit 1
+elif [ ! -f "$NFT_CONFIG" ]; then
+    echo "ERROR: $NFT_CONFIG not found"  1>&2
     exit 1
 fi
-# shellcheck disable=SC1090
-. "$CONFIG_FILE"
 
-
-"$TEXT_EDITOR" "$NFT_CONFIG" && \
+# edit nftables config, check for errors, reload the rules, and print them
+$TEXT_EDITOR "$NFT_CONFIG" && \
     nft --check --file "$NFT_CONFIG" && \
     systemctl reload nftables.service && \
-    nft list ruleset
+   nft list ruleset
