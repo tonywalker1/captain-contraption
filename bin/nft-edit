@@ -38,7 +38,7 @@ fi
 . "$CONFIG_FILE"
 
 
-nano "$NFT_CONFIG" && \
+nano -wl "$NFT_CONFIG" && \
     nft --check --file "$NFT_CONFIG" && \
     systemctl reload nftables.service && \
     nft list ruleset
