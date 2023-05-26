@@ -23,15 +23,6 @@
 # SOFTWARE.
 #
 
-#
-# nft-edit
-#
-# This is a simple wrapper for editing nftables rules: running the individual
-# commands is tedious and error prone. It loads the rules in my preferred text
-# editor. When I exit the editor, this script checks the new ruleset for
-# errors, loads the new rules, and finally prints them.
-#
-
 # load config
 SCRIPT_NAME=$(realpath "$0")
 BIN_DIR=$(dirname "$SCRIPT_NAME")
