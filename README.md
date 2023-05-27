@@ -15,13 +15,13 @@ this project.
 
 # Contents
 
-### **nft-edit**
+### nft-edit
 
 nft-edit is a simple wrapper to reduce the tedium of editing, checking, and reloading firewall rules. It loads the rules
 in your preferred text editor. When you exit your editor, it checks the rules for errors. If no errors are found, it
 loads the new rules, and prints them for visual inspection.
 
-### **mutate**
+### mutate
 
 To prevent accidental overwrites or deletions, immutable files are useful. However, running chattr twice is tedious.
 This script takes the file to edit as a commandline argument and opens it in your preferred text editor. If the
@@ -29,12 +29,22 @@ immutable attribute is set, the script will clear it before editing and set it a
 immutable, then the file is left immutable. In this way, this script can be an all-purpose synonym for your preferred
 text editor.
 
-### ***aide-init, aide-update, aide-check***
+### aide-init, aide-update, aide-check
 
 These scripts simplify rotating databases, etc. when running aide.
 
 * aide-init creates a new database and rotates any existing database (e.g., aide.db.gz -> aide.db.old.gz).
 * aide-update reports changed files, creates a new database, and rotates databases (e.g., aide.db.gz -> aide.db.old.gz
   and aide.db.new.gz -> aide.db.gz).
-* aide-check only reports changed files. No changes to databases. 
+* aide-check only reports changed files. No changes to databases.
 
+### iface-restart
+
+Restarts an interface that is controlled by Network Manager (using nmcli) with a three-second pause between down and up
+operations.
+
+### find-removed-packages
+
+The Apt package manager will not automatically remove generated data and altered config files. This is good; however,
+sometimes you really want to remove everything. This simple tool will list the packages that have residual files. Those
+packages may be then manually removed using the ```apt purge``` command.
