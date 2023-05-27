@@ -23,18 +23,18 @@
 # SOFTWARE.
 #
 
-# Load config from /etc or commandline
-if [ "$1" ]; then
-    CONFIG_FILE="$1"
-elif [ -f "/etc/captain-contraption.conf" ]; then
-    CONFIG_FILE="/etc/captain-contraption.conf"
-elif [ -f "/usr/local/etc/captain-contraption.conf" ]; then
-    CONFIG_FILE="/usr/local/etc/captain-contraption.conf"
-else
-    echo "captain-contraption.conf not found. Exiting."  1>&2
+# load config
+SCRIPT_NAME=$(realpath "$0")
+BIN_DIR=$(dirname "$SCRIPT_NAME")
+ETC_DIR=$(realpath "$BIN_DIR/../etc")
+# shellcheck disable=SC1090
+. "$ETC_DIR/captain-contraption.conf"
+
+# validate input
+if [ ! -f "$AIDE_CONFIG" ]; then
+    echo "ERROR: $AIDE_CONFIG not found."  1>&2
     exit 1
 fi
-# shellcheck disable=SC1090
-. "$CONFIG_FILE"
 
+# check to database against the files
 aide --check --config "$AIDE_CONFIG"

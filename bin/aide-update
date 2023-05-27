@@ -23,27 +23,22 @@
 # SOFTWARE.
 #
 
-# Load config from /etc or commandline
-if [ "$1" ]; then
-    CONFIG_FILE="$1"
-elif [ -f "/etc/captain-contraption.conf" ]; then
-    CONFIG_FILE="/etc/captain-contraption.conf"
-elif [ -f "/usr/local/etc/captain-contraption.conf" ]; then
-    CONFIG_FILE="/usr/local/etc/captain-contraption.conf"
-else
-    echo "captain-contraption.conf not found. Exiting."  1>&2
+# load config
+SCRIPT_NAME=$(realpath "$0")
+BIN_DIR=$(dirname "$SCRIPT_NAME")
+ETC_DIR=$(realpath "$BIN_DIR/../etc")
+# shellcheck disable=SC1090
+. "$ETC_DIR/captain-contraption.conf"
+
+# validate input
+if [ ! -f "$AIDE_CONFIG" ]; then
+    echo "ERROR: $AIDE_CONFIG not found."  1>&2
     exit 1
 fi
-# shellcheck disable=SC1090
-. "$CONFIG_FILE"
 
-# Backup the current database
+# Update the aide database
 if [ -f "$AIDE_DB" ]; then
     cp -f "$AIDE_DB" "$AIDE_OLD_DB"
 fi
-# Initialize the database
 aide --update --config "$AIDE_CONFIG"
-# Replace the current database with the new one
 cp -f "$AIDE_NEW_DB" "$AIDE_DB"
-# Ensure only the owner (probably root) has access
-chmod go-rwx /var/lib/aide/*
