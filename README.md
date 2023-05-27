@@ -28,3 +28,13 @@ This script takes the file to edit as a commandline argument and opens it in you
 immutable attribute is set, the script will clear it before editing and set it after editing. If the file is not
 immutable, then the file is left immutable. In this way, this script can be an all-purpose synonym for your preferred
 text editor.
+
+### ***aide-init, aide-update, aide-check***
+
+These scripts simplify rotating databases, etc. when running aide.
+
+* aide-init creates a new database and rotates any existing database (e.g., aide.db.gz -> aide.db.old.gz).
+* aide-update reports changed files, creates a new database, and rotates databases (e.g., aide.db.gz -> aide.db.old.gz
+  and aide.db.new.gz -> aide.db.gz).
+* aide-check only reports changed files. No changes to databases. 
+
