@@ -23,10 +23,14 @@
 # SOFTWARE.
 #
 
+FILE="$1"
+
 # edit and leave immutability set
-if chattr -i "$FILE"; then
-    EDITOR "$FILE"
-    chattr +i "$FILE"
+if [ -w "$FILE" ]; then
+    $EDITOR "$FILE"
 else
-    EDITOR "$FILE"
+    echo "Toggling immutability..."
+    chattr -i "$FILE"
+    $EDITOR "$FILE"
+    chattr +i "$FILE"
 fi
