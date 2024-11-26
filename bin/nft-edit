@@ -23,27 +23,20 @@
 # SOFTWARE.
 #
 
-# load config
-SCRIPT_NAME=$(realpath "$0")
-BIN_DIR=$(dirname "$SCRIPT_NAME")
-ETC_DIR=$(realpath "$BIN_DIR/../etc")
-# shellcheck disable=SC1090
-. "$ETC_DIR/captain-contraption.conf"
-
-# validate input
-if [ ! "$TEXT_EDITOR" ]; then
-    echo "ERROR: Set TEXT_EDITOR in $ETC_DIR/captain-contraption.conf"  1>&2
-    exit 1
-elif [ ! "$NFT_CONFIG" ]; then
-    echo "ERROR: Set NFT_CONFIG in $ETC_DIR/captain-contraption.conf"  1>&2
-    exit 1
-elif [ ! -f "$NFT_CONFIG" ]; then
-    echo "ERROR: $NFT_CONFIG not found"  1>&2
+# see if we can find nftables.conf in the usual places
+if [ "$1" ]; then
+    NFT_CONFIG="$1"  # argument 1 holds the path
+elif [ -f /etc/sysconfig/nftables.conf ]; then
+    NFT_CONFIG=/etc/sysconfig/nftables.conf    # Fedora/RHEL
+elif [ -f /etc/nftables.conf ]; then
+    NFT_CONFIG=/etc/nftables.conf    # Debian and derivatives
+else
+    echo "ERROR: Can't find /etc/nftables.conf"
     exit 1
 fi
 
 # edit nftables config, check for errors, reload the rules, and print them
-$TEXT_EDITOR "$NFT_CONFIG" && \
+$EDITOR "$NFT_CONFIG" && \
     nft --check --file "$NFT_CONFIG" && \
     systemctl reload nftables.service && \
-   nft list ruleset
+    nft list ruleset
