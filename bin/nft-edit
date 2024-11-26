@@ -36,7 +36,7 @@ else
 fi
 
 # edit nftables config, check for errors, reload the rules, and print them
-$EDITOR "$NFT_CONFIG" && \
+mutate "$NFT_CONFIG" && \
     nft --check --file "$NFT_CONFIG" && \
     systemctl reload nftables.service && \
     nft list ruleset
