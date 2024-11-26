@@ -2,7 +2,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2023  Tony Walker
+# Copyright (c) 2023-2024  Tony Walker
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -25,12 +25,23 @@
 
 FILE="$1"
 
+# look for a config file in some usual places
+CONF_FILE="captain-contraption.conf"
+if [ -f "/etc/$CONF_FILE" ]; then
+    source "/etc/$CONF_FILE"
+elif [ -f "/usr/local/etc/$CONF_FILE" ]; then
+    source "/usr/local/etc/$CONF_FILE"
+elif [ -f "/opt/etc/$CONF_FILE" ]; then
+    source "/opt/etc/$CONF_FILE"
+else
+    TEXT_EDITOR="$EDITOR"
+fi
+
 # edit and leave immutability set
 if [ -w "$FILE" ]; then
-    $EDITOR "$FILE"
+    $TEXT_EDITOR "$FILE"
 else
-    echo "Toggling immutability..."
     chattr -i "$FILE"
-    $EDITOR "$FILE"
+    $TEXT_EDITOR "$FILE"
     chattr +i "$FILE"
 fi

@@ -2,7 +2,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2023  Tony Walker
+# Copyright (c) 2023-2024  Tony Walker
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -25,17 +25,20 @@
 
 # see if we can find nftables.conf in the usual places
 if [ "$1" ]; then
-    NFT_CONFIG="$1"  # argument 1 holds the path
+    # argument 1 holds the path (hopefully)
+    NFT_CONFIG="$1"
 elif [ -f /etc/sysconfig/nftables.conf ]; then
-    NFT_CONFIG=/etc/sysconfig/nftables.conf    # Fedora/RHEL
+    # Fedora/RHEL and derivatives
+    NFT_CONFIG=/etc/sysconfig/nftables.conf
 elif [ -f /etc/nftables.conf ]; then
-    NFT_CONFIG=/etc/nftables.conf    # Debian and derivatives
+    # Debian and derivatives
+    NFT_CONFIG=/etc/nftables.conf
 else
     echo "ERROR: Can't find /etc/nftables.conf"
     exit 1
 fi
 
-# edit nftables config, check for errors, reload the rules, and print them
+# edit nftables.conf, check for errors, reload the rules, and print them
 mutate "$NFT_CONFIG" && \
     nft --check --file "$NFT_CONFIG" && \
     systemctl reload nftables.service && \
