@@ -34,7 +34,7 @@ elif [ -f /etc/nftables.conf ]; then
     # Debian and derivatives
     NFT_CONFIG=/etc/nftables.conf
 else
-    echo "ERROR: Can't find /etc/nftables.conf"
+    echo "ERROR: Can't find nftables.conf"
     exit 1
 fi
 
