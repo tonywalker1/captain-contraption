@@ -15,6 +15,19 @@ this project.
 
 # Contents
 
+### conf-which
+
+This is ```which``` for configuration files. ```conf-which``` will search the usual places for config files and return 
+the path to the config file or exit with an error. One way to use it is:
+```shell
+TEXT_EDITOR="$EDITOR"
+CONF_FILE="$(conf-which captain-contraption.conf)" && source "$CONF_FILE"
+```
+The search paths can be customized by setting ```CONF_WHICH_PATHS``` in your .bashrc, for example:
+```shell
+CONF_WHICH_PATHS="$CONF_WHICH_PATHS":/your/path
+```
+
 ### nft-edit
 
 nft-edit is a simple wrapper to reduce the tedium of editing, checking, and reloading firewall rules. It loads the rules

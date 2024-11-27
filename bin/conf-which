@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 #
 # MIT License
 #
@@ -19,14 +19,51 @@
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# OUT OF OR captain-contraption.confIN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
 
 display_help() {
     echo "Search for the given configuration file in the usual places."
-    echo "Usage: $0 <filename>"
-    echo "       $0 --help-|-h"
+    echo "Usage: conf-which <filename>"
+    echo "       conf-which --show|-s     show search paths and exit"
+    echo "       conf-which --help-|-h    show this message and exit"
+}
+
+find_conf() {
+    FILE="$1"
+
+    local IFS=:
+    if [ "$CONF_WHICH_PATHS" ]; then
+        SP="$CONF_WHICH_PATHS"
+    else
+        SP=".:$HOME:/etc:/usr/local/etc:/opt/etc"
+    fi
+
+    case $1 in
+    '--help' | '-h' )
+        display_help
+        exit 0
+        ;;
+    '--show' | '-s' )
+        echo "$SP"
+        exit 0
+        ;;
+    * )
+        for PREFIX in $SP; do
+            if [ -f "$PREFIX/$FILE" ]; then
+                echo "$PREFIX/$FILE"
+                exit 0
+            elif [ -f "$PREFIX/.$FILE" ]; then
+                echo "$PREFIX/.$FILE"
+                exit 0
+            fi
+        done
+
+        echo "ERROR: $FILE not found."
+        exit 1
+        ;;
+    esac
 }
 
 # handle args
@@ -34,25 +71,4 @@ if [ "$#" -ne 1 ]; then
     display_help
     exit 1
 fi
-case $1 in
-    '--help' | '-h' )
-        display_help
-        exit 0
-    ;;
-    * )
-        FILE="$1"
-        if [ -f "$HOME/.$FILE" ]; then
-            echo "/etc/$FILE"
-        elif [ -f "/etc/$FILE" ]; then
-            echo "/etc/$FILE"
-        elif [ -f "/usr/local/etc/$FILE" ]; then
-            echo "/usr/local/etc/$FILE"
-        elif [ -f "/opt/etc/$FILE" ]; then
-            echo "/opt/etc/$FILE"
-        else
-            echo "ERROR: $FILE not found."
-            exit 1
-        fi
-        exit 0
-    ;;
-esac
+find_conf "$1"
