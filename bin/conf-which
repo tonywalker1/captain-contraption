@@ -23,17 +23,36 @@
 # SOFTWARE.
 #
 
-FILE="$1"
+display_help() {
+    echo "Search for the given configuration file in the usual places."
+    echo "Usage: $0 <filename>"
+    echo "       $0 --help-|-h"
+}
 
-# look for a config file in some usual places
-TEXT_EDITOR="$EDITOR"
-CONF_FILE="$(conf-which captain-contraption.conf)" && source "$CONF_FILE"
-
-# edit and leave immutability set
-if [ -w "$FILE" ]; then
-    $TEXT_EDITOR "$FILE"
-else
-    chattr -i "$FILE"
-    $TEXT_EDITOR "$FILE"
-    chattr +i "$FILE"
+# handle args
+if [ "$#" -ne 1 ]; then
+    display_help
+    exit 1
 fi
+case $1 in
+    '--help' | '-h' )
+        display_help
+        exit 0
+    ;;
+    * )
+        FILE="$1"
+        if [ -f "$HOME/.$FILE" ]; then
+            echo "/etc/$FILE"
+        elif [ -f "/etc/$FILE" ]; then
+            echo "/etc/$FILE"
+        elif [ -f "/usr/local/etc/$FILE" ]; then
+            echo "/usr/local/etc/$FILE"
+        elif [ -f "/opt/etc/$FILE" ]; then
+            echo "/opt/etc/$FILE"
+        else
+            echo "ERROR: $FILE not found."
+            exit 1
+        fi
+        exit 0
+    ;;
+esac
