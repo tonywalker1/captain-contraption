@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/bash
 #
 # MIT License
 #
@@ -49,10 +49,29 @@ while [ $# -gt 0 ]; do
     esac
 done
 
-for SOME_USER in /run/user/*; do
-    SOME_USER=$(basename "$SOME_USER")
-    sudo -u $(id -u -n "$SOME_USER") \
-        DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/"$SOME_USER"/bus notify-send ${@+"$@"}
+for SESSION_DIR in /run/user/*; do
+    UID=$(basename "$SESSION_DIR")
+
+    # Skip if not a valid UID directory
+    if ! [[ "$UID" =~ ^[0-9]+$ ]]; then
+        continue
+    fi
+
+    # Skip if DBUS socket doesn't exist
+    if [ ! -S "$SESSION_DIR/bus" ]; then
+        continue
+    fi
+
+    # Convert UID to username
+    USERNAME=$(getent passwd "$UID" | cut -d: -f1)
+    if [ -z "$USERNAME" ]; then
+        continue
+    fi
+
+    # Send notification
+    sudo -u "$USERNAME" \
+        DBUS_SESSION_BUS_ADDRESS=unix:path="$SESSION_DIR/bus" \
+        notify-send ${@+"$@"}
 done
 
 exit 0

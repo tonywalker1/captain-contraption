@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/sh
 #
 # MIT License
 #
@@ -23,19 +23,27 @@
 # SOFTWARE.
 #
 
+display_help() {
+    echo "Edit nftables firewall rules with validation and reload."
+    echo "Usage: nft-edit [path-to-nftables.conf]"
+    echo "       nft-edit -h|--help    show this message and exit"
+}
+
+# Handle help flag
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    display_help
+    exit 0
+fi
+
 # see if we can find nftables.conf in the usual places
 if [ "$1" ]; then
     # argument 1 holds the path (hopefully)
     NFT_CONFIG="$1"
-elif [ -f /etc/sysconfig/nftables.conf ]; then
-    # Fedora/RHEL and derivatives
-    NFT_CONFIG=/etc/sysconfig/nftables.conf
-elif [ -f /etc/nftables.conf ]; then
-    # Debian and derivatives
-    NFT_CONFIG=/etc/nftables.conf
 else
-    echo "ERROR: Can't find nftables.conf"
-    exit 1
+    NFT_CONFIG="$(conf-which nftables.conf)" || {
+        echo "ERROR: nftables.conf not found" >&2
+        exit 1
+    }
 fi
 
 # edit nftables.conf, check for errors, reload the rules, and print them

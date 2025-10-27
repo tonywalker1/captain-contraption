@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/sh
 #
 # MIT License
 #
@@ -23,22 +23,35 @@
 # SOFTWARE.
 #
 
-# load config
-SCRIPT_NAME=$(realpath "$0")
-BIN_DIR=$(dirname "$SCRIPT_NAME")
-ETC_DIR=$(realpath "$BIN_DIR/../etc")
-# shellcheck disable=SC1090
-. "$ETC_DIR/captain-contraption.conf"
+display_help() {
+    echo "Update AIDE database."
+    echo "Usage: aide-update"
+    echo "       aide-update -h|--help    show this message and exit"
+}
 
-# validate input
-if [ ! -f "$AIDE_CONFIG" ]; then
-    echo "ERROR: $AIDE_CONFIG not found."  1>&2
+# Handle help flag
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    display_help
+    exit 0
+fi
+
+CONF_FILE="$(conf-which captain-contraption.conf)" && source "$CONF_FILE" || {
+    echo "ERROR: captain-contraption.conf not found" >&2
     exit 1
+}
+AIDE_CONF="$(conf-which aide.conf)" || {
+    echo "ERROR: aide.conf not found" >&2
+    exit 1
+}
+
+if [ -f "$AIDE_CUR_DB" ]; then
+    cp -f "$AIDE_CUR_DB" "$AIDE_OLD_DB"
 fi
 
-# Update the aide database
-if [ -f "$AIDE_DB" ]; then
-    cp -f "$AIDE_DB" "$AIDE_OLD_DB"
+if [ -f "$AIDE_CUR_DB" ]; then
+    aide --update --config "$AIDE_CONF"
+else
+    echo "Warning: $AIDE_CUR_DB not found, creating instead of updating..."
+    aide --init --config "$AIDE_CONF"
 fi
-aide --update --config "$AIDE_CONFIG"
-cp -f "$AIDE_NEW_DB" "$AIDE_DB"
+mv -f "$AIDE_NEW_DB" "$AIDE_CUR_DB"

@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash
 #
 # MIT License
 #
@@ -23,18 +23,60 @@
 # SOFTWARE.
 #
 
+display_help() {
+    echo "Edit a file, handling immutability attributes."
+    echo "Usage: mutate <file>"
+    echo "       mutate -h|--help    show this message and exit"
+}
+
+# Handle help flag
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    display_help
+    exit 0
+fi
+
+# Validate file argument
+if [ "$#" -ne 1 ]; then
+    display_help >&2
+    exit 1
+fi
+
 FILE="$1"
 CONF_FILE="captain-contraption.conf"
 
 # look for a config file in some usual places
 TEXT_EDITOR="$EDITOR"
-CONF_FILE="$(conf-which $CONF_FILE)" && source "$CONF_FILE"
+CONF_FILE="$(conf-which $CONF_FILE)" && source "$CONF_FILE" || {
+    echo "ERROR: captain-contraption.conf not found" >&2
+    exit 1
+}
+
+# Validate file exists
+if [ ! -e "$FILE" ]; then
+    echo "ERROR: File does not exist: $FILE" >&2
+    exit 1
+fi
+
+# Validate TEXT_EDITOR is set
+if [ -z "$TEXT_EDITOR" ]; then
+    echo "ERROR: TEXT_EDITOR is not set. Set EDITOR environment variable or TEXT_EDITOR in captain-contraption.conf" >&2
+    exit 1
+fi
+
+# Validate TEXT_EDITOR is executable
+if ! command -v "$TEXT_EDITOR" &>/dev/null; then
+    echo "ERROR: TEXT_EDITOR is not executable: $TEXT_EDITOR" >&2
+    exit 1
+fi
+
+# Convert TEXT_EDITOR to array for safe invocation
+declare -a editor_cmd=("$TEXT_EDITOR")
 
 # edit and leave immutability set
 if [ -w "$FILE" ]; then
-    $TEXT_EDITOR "$FILE"
+    "${editor_cmd[@]}" "$FILE"
 else
     chattr -i "$FILE"
-    $TEXT_EDITOR "$FILE"
+    "${editor_cmd[@]}" "$FILE"
     chattr +i "$FILE"
 fi

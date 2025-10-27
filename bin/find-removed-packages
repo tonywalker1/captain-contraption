@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/sh
 #
 # MIT License
 #
@@ -22,5 +22,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
+
+display_help() {
+    echo "List packages with residual files after removal."
+    echo "Usage: find-removed-packages"
+    echo "       find-removed-packages -h|--help    show this message and exit"
+}
+
+# Handle help flag
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    display_help
+    exit 0
+fi
 
 dpkg --list | grep "^rc "

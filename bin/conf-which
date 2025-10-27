@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash
 #
 # MIT License
 #
@@ -19,15 +19,15 @@
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR captain-contraption.confIN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
 
 display_help() {
     echo "Search for the given configuration file in the usual places."
     echo "Usage: conf-which <filename>"
-    echo "       conf-which --show|-s     show search paths and exit"
-    echo "       conf-which --help-|-h    show this message and exit"
+    echo "       conf-which -s|--show     show search paths and exit"
+    echo "       conf-which -h|--help     show this message and exit"
 }
 
 find_conf() {
@@ -41,11 +41,11 @@ find_conf() {
     fi
 
     case $1 in
-    '--help' | '-h' )
+    '-h' | '--help' )
         display_help
         exit 0
         ;;
-    '--show' | '-s' )
+    '-s' | '--show' )
         echo "$SP"
         exit 0
         ;;
@@ -59,6 +59,13 @@ find_conf() {
                 exit 0
             fi
         done
+
+        # as a last resort, do a recursive search of /etc
+        TMPVAL=$(find /etc -name "$FILE" 2>/dev/null)
+        if [ -n "$TMPVAL" ]; then
+            echo "$TMPVAL"
+            exit 0
+        fi
 
         echo "ERROR: $FILE not found."
         exit 1

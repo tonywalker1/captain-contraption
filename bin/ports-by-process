@@ -1,0 +1,194 @@
+#!/usr/bin/bash
+#
+# MIT License
+#
+# Copyright (c) 2025  Tony Walker
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+display_help() {
+    echo "Display listening TCP/UDP ports grouped by process name."
+    echo ""
+    echo "Usage: ports-by-process [pattern1] [pattern2] ..."
+    echo "       ss -ltup | ports-by-process [pattern1] [pattern2] ..."
+    echo ""
+    echo "Patterns are treated as regex and matched against process names."
+    echo "Matching processes will be grouped and shown first, followed by a"
+    echo "'remainder' section with all other listening ports."
+    echo ""
+    echo "Patterns can also be configured in captain-contraption.conf using"
+    echo "the PRIORITY_PORTS variable (newline-separated)."
+    echo ""
+    echo "Examples:"
+    echo "  ports-by-process kdeconnectd firefox-bin"
+    echo "  ports-by-process 'jetbrains.*'"
+    echo "  ss -ltup | ports-by-process kdeconnectd firefox-bin"
+}
+
+# Handle help flag
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    display_help
+    exit 0
+fi
+
+# Load configuration file
+CONF_FILE="captain-contraption.conf"
+if CONF_FILE="$(conf-which "$CONF_FILE" 2>/dev/null)" && [ -f "$CONF_FILE" ]; then
+    source "$CONF_FILE"
+fi
+
+# Collect priority patterns: CLI args override config file
+declare -a priority_patterns
+if [ "$#" -gt 0 ]; then
+    # Use command line arguments
+    priority_patterns=("$@")
+else
+    # Use config file patterns (newline-separated)
+    if [ -n "$PRIORITY_PORTS" ]; then
+        while IFS= read -r pattern; do
+            # Skip empty lines and comments
+            pattern="${pattern%%#*}"  # Remove inline comments
+            pattern="${pattern%"${pattern##*[! $'\t']}"}"  # Trim trailing whitespace
+            pattern="${pattern#"${pattern%%[! $'\t']*}"}"  # Trim leading whitespace
+            if [ -n "$pattern" ]; then
+                priority_patterns+=("$pattern")
+            fi
+        done <<< "$PRIORITY_PORTS"
+    fi
+fi
+
+# Get the ss output - either from pipe or by running ss -ltup
+if [ -t 0 ]; then
+    # No pipe, run ss command
+    SS_OUTPUT=$(ss -ltup 2>/dev/null)
+else
+    # Read from pipe
+    SS_OUTPUT=$(cat)
+fi
+
+# Create associative arrays to hold the output
+declare -A process_lines
+declare -a all_processes
+declare -A pattern_sections
+declare -a pattern_order
+header_line=""
+
+# Initialize pattern sections in order
+for pattern in "${priority_patterns[@]}"; do
+    pattern_sections["$pattern"]=""
+    pattern_order+=("$pattern")
+done
+
+# Parse ss output and group by process
+while IFS= read -r line; do
+    # Capture header line (appears first in ss output)
+    if [[ "$line" =~ ^Netid ]]; then
+        header_line="$line"
+        continue
+    fi
+
+    # Skip empty lines
+    if [[ "$line" =~ ^$ ]]; then
+        continue
+    fi
+
+    # Extract process name from the users: field
+    # Format: users:(("processname",pid=NUMBER,fd=NUMBER)) or users:(("processname",pid=NUMBER,fd=NUMBER),(...))
+    if [[ "$line" =~ \(\(\"([^\"]+)\" ]]; then
+        process_name="${BASH_REMATCH[1]}"
+
+        # Initialize array for this process if not exists
+        if [ -z "${process_lines[$process_name]}" ]; then
+            process_lines["$process_name"]=""
+            all_processes+=("$process_name")
+        fi
+
+        # Append line to this process's group
+        if [ -z "${process_lines[$process_name]}" ]; then
+            process_lines["$process_name"]="$line"
+        else
+            process_lines["$process_name"]="${process_lines[$process_name]}"$'\n'"$line"
+        fi
+    fi
+done <<< "$SS_OUTPUT"
+
+# Match processes against patterns and organize output
+declare -A matched_processes  # Track which processes have been matched
+
+for pattern in "${pattern_order[@]}"; do
+    for proc in "${all_processes[@]}"; do
+        # Skip if already matched in a previous pattern
+        if [ -n "${matched_processes[$proc]}" ]; then
+            continue
+        fi
+
+        # Try to match process name against pattern (invalid patterns just won't match)
+        if [[ "$proc" =~ $pattern ]] 2>/dev/null; then
+            # Add to section
+            if [ -z "${pattern_sections[$pattern]}" ]; then
+                pattern_sections["$pattern"]="${process_lines[$proc]}"
+            else
+                pattern_sections["$pattern"]="${pattern_sections[$pattern]}"$'\n'"${process_lines[$proc]}"
+            fi
+            matched_processes["$proc"]=1
+        fi
+    done
+done
+
+# Display priority patterns first
+for pattern in "${pattern_order[@]}"; do
+    if [ -n "${pattern_sections[$pattern]}" ]; then
+        echo "[$pattern]"
+        if [ -n "$header_line" ]; then
+            echo "$header_line"
+        fi
+        echo "${pattern_sections[$pattern]}"
+        echo ""
+    fi
+done
+
+# Collect remaining unmatched processes
+remainder=""
+for proc in "${all_processes[@]}"; do
+    if [ -z "${matched_processes[$proc]}" ]; then
+        if [ -z "$remainder" ]; then
+            remainder="${process_lines[$proc]}"
+        else
+            remainder="$remainder"$'\n'"${process_lines[$proc]}"
+        fi
+    fi
+done
+
+# Display remainder
+if [ -n "$remainder" ]; then
+    echo "[remainder]"
+    if [ -n "$header_line" ]; then
+        echo "$header_line"
+    fi
+    echo "$remainder"
+fi
+
+# Show hint if no patterns were configured
+if [ ${#priority_patterns[@]} -eq 0 ]; then
+    echo ""
+    echo "Tip: Configure priority processes in captain-contraption.conf" >&2
+    echo "Set PRIORITY_PORTS with newline-separated regex patterns." >&2
+    echo "See 'ports-by-process --help' for examples." >&2
+fi

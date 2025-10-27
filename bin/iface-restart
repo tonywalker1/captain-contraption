@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/sh
 #
 # MIT License
 #
@@ -22,5 +22,23 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
+
+display_help() {
+    echo "Restart a network interface managed by NetworkManager."
+    echo "Usage: iface-restart <connection-name>"
+    echo "       iface-restart --help|-h    show this message and exit"
+}
+
+# Handle help flag
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    display_help
+    exit 0
+fi
+
+# Validate exactly one argument provided
+if [ "$#" -ne 1 ]; then
+    display_help >&2
+    exit 1
+fi
 
 nmcli connection down "$1" && sleep 3 && nmcli connection up "$1"
