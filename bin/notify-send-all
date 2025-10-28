@@ -2,7 +2,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2022-2023  Tony Walker
+# Copyright (c) 2022-2025  Tony Walker
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -29,12 +29,11 @@ display_help() {
     echo "Usage: notify-send-all [options] <summary> [body]"
     echo ""
     echo "Options:"
-    echo "  -? | --help    This text."
+    echo "  -h | --help    This text."
     echo ""
     echo "All options from notify-send are supported, see below..."
     echo
     notify-send --help
-    exit 1
 }
 
 while [ $# -gt 0 ]; do

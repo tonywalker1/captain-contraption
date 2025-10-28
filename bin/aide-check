@@ -1,8 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 #
 # MIT License
 #
-# Copyright (c) 2023-2024  Tony Walker
+# Copyright (c) 2023-2025  Tony Walker
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,9 @@ if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     exit 0
 fi
 
-CONF_FILE="$(conf-which captain-contraption.conf)" && source "$CONF_FILE" || {
+CONF_FILE="$(conf-which captain-contraption.conf)"
+# shellcheck disable=SC1090
+source "$CONF_FILE" || {
     echo "ERROR: captain-contraption.conf not found" >&2
     exit 1
 }

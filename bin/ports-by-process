@@ -51,6 +51,7 @@ fi
 # Load configuration file
 CONF_FILE="captain-contraption.conf"
 if CONF_FILE="$(conf-which "$CONF_FILE" 2>/dev/null)" && [ -f "$CONF_FILE" ]; then
+    # shellcheck disable=SC1090
     source "$CONF_FILE"
 fi
 

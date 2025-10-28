@@ -2,7 +2,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2022-2023  Tony Walker
+# Copyright (c) 2022-2025  Tony Walker
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -24,9 +24,13 @@
 #
 
 display_help() {
-    echo "List packages with residual files after removal."
+    echo "List packages with residual files after removal (Debian/Ubuntu only)."
+    echo ""
     echo "Usage: find-removed-packages"
     echo "       find-removed-packages -h|--help    show this message and exit"
+    echo ""
+    echo "This script is designed for Debian/Ubuntu systems using apt/dpkg."
+    echo "For RPM-based systems, see README.md for alternative approaches."
 }
 
 # Handle help flag

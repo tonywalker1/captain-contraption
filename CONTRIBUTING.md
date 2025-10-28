@@ -2,7 +2,9 @@
 
 Thank you for your interest in contributing to captain-contraption!
 
-We're building a useful collection of shell scripts for Linux system administration, and we'd love your help. Whether you're fixing a typo, reporting a bug, suggesting a feature, or writing code, **all contributions are welcome and appreciated**.
+We're building a useful collection of shell scripts for Linux system administration, and we'd love your help. Whether
+you're fixing a typo, reporting a bug, suggesting a feature, or writing code, **all contributions are welcome and
+appreciated**.
 
 ## First Time Contributing?
 
@@ -178,10 +180,10 @@ Before submitting:
    ```
 
 2. **Open a pull request** on GitHub with:
-   - **Clear title** - "Add utility to check system load"
-   - **Description of changes** - What you changed and why
-   - **Related issues** - Reference any issues this addresses
-   - **Testing notes** - How you tested this, what systems you tested on
+    - **Clear title** - "Add utility to check system load"
+    - **Description of changes** - What you changed and why
+    - **Related issues** - Reference any issues this addresses
+    - **Testing notes** - How you tested this, what systems you tested on
 
 3. **Respond to feedback** - Maintainers may suggest changes. This is normal!
 

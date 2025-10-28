@@ -2,7 +2,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2023-2024  Tony Walker
+# Copyright (c) 2023-2025  Tony Walker
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -61,9 +61,9 @@ find_conf() {
         done
 
         # as a last resort, do a recursive search of /etc
-        TMPVAL=$(find /etc -name "$FILE" 2>/dev/null)
-        if [ -n "$TMPVAL" ]; then
-            echo "$TMPVAL"
+        TMP_VAL=$(find /etc -name "$FILE" 2>/dev/null)
+        if [ -n "$TMP_VAL" ]; then
+            echo "$TMP_VAL"
             exit 0
         fi
 

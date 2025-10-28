@@ -69,9 +69,40 @@ operations.
 
 ### find-removed-packages
 
+**Note: Debian/Ubuntu systems only (apt/dpkg)**
+
 The Apt package manager will not automatically remove generated data and altered config files. This is good; however,
 sometimes you really want to remove everything. This simple tool will list the packages that have residual files. Those
 packages may be then manually removed using the ```apt purge``` command.
+
+#### RPM-based Systems (Fedora, RHEL, CentOS, openSUSE)
+
+RPM-based systems handle package removal differently. When a package is removed, it's deleted from the package database,
+so there is no built-in "removed but config files remain" state. However, you may still have orphaned configuration files
+that are no longer owned by any package.
+
+To find and manage these on RPM systems:
+
+```bash
+# Find files in /etc/ not owned by any package
+find /etc -type f -exec rpm -qf {} \; 2>&1 | grep "is not owned"
+
+# Check for missing files from installed packages
+rpm -Va | grep "^missing"
+
+# For more comprehensive package management, consider using tools designed for this:
+# - rpmorphan - finds orphaned packages and files
+# - cruft - finds files not owned by any package
+```
+
+To remove orphaned config files on RPM systems, back them up first, then delete them manually:
+```bash
+# Back up orphaned config
+tar czf /tmp/orphaned-configs.tar.gz /etc/path/to/config
+
+# Remove the file
+rm /etc/path/to/config
+```
 
 ### ports-by-process
 
